@@ -1,6 +1,8 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entities.City;
+import com.example.demo.exception.CityAlreadyExistsException;
+import com.example.demo.exception.CityNotFoundException;
 import com.example.demo.services.CityService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,14 @@ public class CityController {
 
     private final CityService cityService;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<City>> getAll() {
-        return new ResponseEntity<>(cityService.getAll(), OK);
+    @GetMapping
+    public ResponseEntity<List<City>> getAll(@RequestParam(required = false) String name) {
+        return new ResponseEntity<>(cityService.getAll(name), OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<City> getCity(@PathVariable String id){
+        return new ResponseEntity<>(cityService.findByCityId(id),OK);
     }
 
     @PostMapping("/create")
@@ -39,5 +46,17 @@ public class CityController {
         cityService.delete(id);
         return new ResponseEntity<>(OK);
     }
+
+
+    @ExceptionHandler(CityNotFoundException.class)
+    public ResponseEntity<String> handlerCityNotFoundException(CityNotFoundException ex){
+        return new ResponseEntity<>(ex.getMessage(), NOT_FOUND);
+    }
+
+    @ExceptionHandler(CityAlreadyExistsException.class)
+    public ResponseEntity<String> handlerCityAlreadyExistsException(CityAlreadyExistsException ex){
+        return new ResponseEntity<>(ex.getMessage(), NOT_FOUND);
+    }
+
 
 }
